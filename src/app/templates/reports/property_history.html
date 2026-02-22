@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report.property.address }} - Payment History - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Payment History Report</h1>
+    <a href="{{ url_for('properties.detail', property_id=report.property.id) }}" class="btn btn-outline-secondary">Back to Property</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">{{ report.property.address }}, {{ report.property.city }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="text-muted">Total Charged</div>
+                <div class="fs-4">${{ "%.2f" | format(report.total_charges) }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted">Total Paid</div>
+                <div class="fs-4 text-success">${{ "%.2f" | format(report.total_payments) }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted">Balance</div>
+                <div class="fs-4 {% if report.balance > 0 %}text-danger{% else %}text-success{% endif %}">
+                    ${{ "%.2f" | format(report.balance) }}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted">Tenants</div>
+                <div class="fs-4">{{ report.current_tenants | length }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Timeline Chart -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Payment Timeline (Last 12 Months)</h5>
+    </div>
+    <div class="card-body">
+        {% if timeline %}
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Payments Received</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in timeline %}
+                <tr>
+                    <td>{{ month.month }}</td>
+                    <td>{{ month.payment_count }}</td>
+                    <td>${{ "%.2f" | format(month.total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No payment data available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Payment Details -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">All Payments</h5>
+    </div>
+    <div class="card-body">
+        {% if report.payments %}
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Allocated To</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in report.payments %}
+                <tr>
+                    <td>{{ payment.payment_date.strftime('%b %d, %Y') }}</td>
+                    <td>${{ "%.2f" | format(payment.amount) }}</td>
+                    <td>{{ payment.allocations | length }} charge(s)</td>
+                    <td>{{ payment.notes or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No payments recorded.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Rent Charges -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Rent Charges</h5>
+    </div>
+    <div class="card-body">
+        {% if report.charges %}
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Period</th>
+                    <th>Amount Due</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Allocated</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for charge in report.charges %}
+                <tr>
+                    <td>{{ charge.period_start.strftime('%b %d') }} - {{ charge.period_end.strftime('%b %d, %Y') }}</td>
+                    <td>${{ "%.2f" | format(charge.amount_due) }}</td>
+                    <td>{{ charge.due_date.strftime('%b %d, %Y') }}</td>
+                    <td>
+                        {% if charge.status == ChargeStatus.PAID %}
+                        <span class="badge bg-success">Paid</span>
+                        {% elif charge.status == ChargeStatus.LATE %}
+                        <span class="badge bg-warning">Late</span>
+                        {% elif charge.status == ChargeStatus.IN_ARREARS %}
+                        <span class="badge bg-danger">In Arrears</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Charged</span>
+                        {% endif %}
+                    </td>
+                    <td>${{ "%.2f" | format(charge.payment_allocations | sum(attribute='amount')) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No rent charges recorded.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

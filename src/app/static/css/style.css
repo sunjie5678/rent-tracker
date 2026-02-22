@@ -1,0 +1,115 @@
+/* Custom styles for RentTrack */
+
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Card improvements */
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Table improvements */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* Badge improvements */
+.badge {
+    font-size: 0.85em;
+}
+
+/* Button improvements */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Form improvements */
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Navbar improvements */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+}
+
+/* Dashboard specific */
+.card .display-6 {
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+/* Status colors */
+.status-charged {
+    color: #6c757d;
+}
+
+.status-paid {
+    color: #28a745;
+}
+
+.status-late {
+    color: #ffc107;
+}
+
+.status-arrears {
+    color: #dc3545;
+}
+
+/* Tab content */
+.tab-content {
+    padding-top: 1rem;
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn {
+        display: none !important;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .card .display-6 {
+        font-size: 1.5rem;
+    }
+
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}

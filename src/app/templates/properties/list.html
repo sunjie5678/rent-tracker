@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Properties - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Properties</h1>
+    <a href="{{ url_for('properties.create') }}" class="btn btn-primary">+ Add Property</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if properties %}
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Monthly Rent</th>
+                    <th>Tenants</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for property, tenant_count in properties %}
+                <tr>
+                    <td>{{ property.address }}</td>
+                    <td>{{ property.city }}</td>
+                    <td>${{ "%.2f" | format(property.monthly_rent) }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ tenant_count }}</span>
+                    </td>
+                    <td>
+                        {% if property.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('properties.detail', property_id=property.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{{ url_for('properties.edit', property_id=property.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">No properties found.</p>
+            <a href="{{ url_for('properties.create') }}" class="btn btn-primary">Add Your First Property</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

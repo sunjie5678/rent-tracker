@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Allocate Payment - RentTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Allocate Payment</h4>
+            </div>
+            <div class="card-body">
+                <!-- Payment Summary -->
+                <div class="alert alert-info">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Payment Amount:</strong><br>
+                            ${{ "%.2f" | format(payment.amount) }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Allocated:</strong><br>
+                            ${{ "%.2f" | format(payment.amount - balance) }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Available:</strong><br>
+                            ${{ "%.2f" | format(balance) }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if balance <= 0 %}
+                <div class="alert alert-success">
+                    This payment has been fully allocated.
+                </div>
+                <a href="{{ url_for('payments.detail', payment_id=payment.id) }}" class="btn btn-secondary">Back to Payment</a>
+                {% elif outstanding %}
+                <!-- Manual Allocation Form -->
+                <form method="POST" action="{{ url_for('allocations.allocate', payment_id=payment.id) }}">
+                    {{ form.csrf_token }}
+                    {{ form.payment_id }}
+
+                    <div class="mb-3">
+                        {{ form.rent_charge_id.label(class="form-label") }}
+                        {{ form.rent_charge_id(class="form-select", required=true) }}
+                        {% if form.rent_charge_id.errors %}
+                        <div class="invalid-feedback d-block">{{ form.rent_charge_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.amount.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.amount(class="form-control", required=true, step="0.01", min="0.01", max=balance) }}
+                        </div>
+                        <div class="form-text">Maximum: ${{ "%.2f" | format(balance) }}</div>
+                        {% if form.amount.errors %}
+                        <div class="invalid-feedback d-block">{{ form.amount.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('payments.detail', payment_id=payment.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <!-- Auto-Allocate Form (separate form) -->
+                <form method="POST" action="{{ url_for('allocations.auto_allocate', payment_id=payment.id) }}">
+                    {{ auto_form.csrf_token }}
+                    {{ auto_form.payment_id }}
+                    <div class="d-grid">
+                        {{ auto_form.submit(class="btn btn-outline-primary") }}
+                    </div>
+                    <div class="form-text text-center">Automatically allocate to oldest outstanding charges first</div>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    No outstanding charges to allocate to.
+                </div>
+                <a href="{{ url_for('payments.detail', payment_id=payment.id) }}" class="btn btn-secondary">Back to Payment</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Outstanding Charges -->
+        {% if outstanding %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Outstanding Charges (Oldest First)</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Due Date</th>
+                            <th>Amount Due</th>
+                            <th>Allocated</th>
+                            <th>Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for charge in outstanding %}
+                        {% set allocated = charge.payment_allocations | sum(attribute='amount') %}
+                        {% set remaining = charge.amount_due - allocated %}
+                        <tr>
+                            <td>{{ charge.period_start.strftime('%b %d') }} - {{ charge.period_end.strftime('%b %d') }}</td>
+                            <td>{{ charge.due_date.strftime('%b %d, %Y') }}</td>
+                            <td>${{ "%.2f" | format(charge.amount_due) }}</td>
+                            <td>${{ "%.2f" | format(allocated) }}</td>
+                            <td>${{ "%.2f" | format(remaining) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tenant.name }} - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ tenant.name }}</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('tenants.edit', tenant_id=tenant.id) }}" class="btn btn-outline-primary">Edit</a>
+        <form method="POST" action="{{ url_for('tenants.delete', tenant_id=tenant.id) }}" class="d-inline" onsubmit="return confirm('Are you sure?');">
+            <button type="submit" class="btn btn-outline-danger">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Tenant Info -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Tenant Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Name:</strong> {{ tenant.name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong>
+                    {% if tenant.email %}
+                    <a href="mailto:{{ tenant.email }}">{{ tenant.email }}</a>
+                    {% else %}
+                    <span class="text-muted">Not provided</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Phone:</strong>
+                    {% if tenant.phone %}
+                    {{ tenant.phone }}
+                    {% else %}
+                    <span class="text-muted">Not provided</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Move-in Date:</strong> {{ tenant.move_in_date.strftime('%B %d, %Y') }}
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong>
+                    {% if tenant.move_out_date %}
+                    <span class="badge bg-secondary">Moved Out ({{ tenant.move_out_date.strftime('%B %d, %Y') }})</span>
+                    {% else %}
+                    <span class="badge bg-success">Current Tenant</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Info -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Property</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Address:</strong><br>
+                    {{ tenant.property.address }}
+                </div>
+                <div class="mb-3">
+                    <strong>City:</strong> {{ tenant.property.city }}
+                </div>
+                <div class="mb-3">
+                    <strong>Monthly Rent:</strong> ${{ "%.2f" | format(tenant.property.monthly_rent) }}
+                </div>
+                <a href="{{ url_for('properties.detail', property_id=tenant.property_id) }}" class="btn btn-outline-primary btn-sm">View Property</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rent Charges -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Rent Charges</h5>
+            </div>
+            <div class="card-body">
+                {% if charges %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for charge in charges %}
+                        <tr>
+                            <td>{{ charge.period_start.strftime('%b %Y') }}</td>
+                            <td>${{ "%.2f" | format(charge.amount_due) }}</td>
+                            <td>
+                                {% if charge.status == ChargeStatus.PAID %}
+                                <span class="badge bg-success">Paid</span>
+                                {% elif charge.status == ChargeStatus.LATE %}
+                                <span class="badge bg-warning">Late</span>
+                                {% elif charge.status == ChargeStatus.IN_ARREARS %}
+                                <span class="badge bg-danger">In Arrears</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Charged</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No rent charges recorded.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

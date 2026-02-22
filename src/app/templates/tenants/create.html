@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Add Tenant - RentTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Add New Tenant</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('tenants.create') }}">
+                    {{ form.csrf_token }}
+
+                    <div class="mb-3">
+                        {{ form.property_id.label(class="form-label") }}
+                        {{ form.property_id(class="form-select", required=true) }}
+                        {% if form.property_id.errors %}
+                        <div class="invalid-feedback d-block">{{ form.property_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control", required=true) }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">{{ form.name.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control") }}
+                            <div class="form-text">Required for email notifications</div>
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">{{ form.email.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.phone.label(class="form-label") }}
+                            {{ form.phone(class="form-control") }}
+                            {% if form.phone.errors %}
+                            <div class="invalid-feedback d-block">{{ form.phone.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.move_in_date.label(class="form-label") }}
+                            {{ form.move_in_date(class="form-control", type="date", required=true) }}
+                            {% if form.move_in_date.errors %}
+                            <div class="invalid-feedback d-block">{{ form.move_in_date.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.move_out_date.label(class="form-label") }}
+                            {{ form.move_out_date(class="form-control", type="date") }}
+                            <div class="form-text">Leave empty for current tenant</div>
+                            {% if form.move_out_date.errors %}
+                            <div class="invalid-feedback d-block">{{ form.move_out_date.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('tenants.list_tenants') }}" class="btn btn-outline-secondary">Cancel</a>
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}{{ property.address }} - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ property.address }}</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('reports.property_report', property_id=property.id) }}" class="btn btn-outline-info">View Report</a>
+        <a href="{{ url_for('properties.edit', property_id=property.id) }}" class="btn btn-outline-primary">Edit</a>
+        <form method="POST" action="{{ url_for('properties.delete', property_id=property.id) }}" class="d-inline" onsubmit="return confirm('Are you sure? This will delete all associated tenants and payments.');">
+            <button type="submit" class="btn btn-outline-danger">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Property Info Card -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Property Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Address:</strong> {{ property.address }}
+                </div>
+                <div class="mb-2">
+                    <strong>City:</strong> {{ property.city }}
+                </div>
+                <div class="mb-2">
+                    <strong>Postal Code:</strong> {{ property.postal_code }}
+                </div>
+                <div class="mb-2">
+                    <strong>Monthly Rent:</strong> ${{ "%.2f" | format(property.monthly_rent) }}
+                </div>
+                <div class="mb-2">
+                    <strong>Status:</strong>
+                    {% if property.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Financial Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Total Charged:</strong> ${{ "%.2f" | format(report.total_charges) }}
+                </div>
+                <div class="mb-2">
+                    <strong>Total Paid:</strong> ${{ "%.2f" | format(report.total_payments) }}
+                </div>
+                <div class="mb-2">
+                    <strong>Balance:</strong>
+                    <span class="{% if report.balance > 0 %}text-danger{% else %}text-success{% endif %}">
+                        ${{ "%.2f" | format(report.balance) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs for Tenants, Payments, Charges -->
+    <div class="col-md-8">
+        <ul class="nav nav-tabs" id="propertyTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tenants-tab" data-bs-toggle="tab" data-bs-target="#tenants" type="button">
+                    Tenants ({{ report.current_tenants | length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button">
+                    Payments ({{ report.payments | length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="charges-tab" data-bs-toggle="tab" data-bs-target="#charges" type="button">
+                    Rent Charges ({{ report.charges | length }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3" id="propertyTabsContent">
+            <!-- Tenants Tab -->
+            <div class="tab-pane fade show active" id="tenants" role="tabpanel">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>Current Tenants</h5>
+                    <a href="{{ url_for('tenants.create') }}" class="btn btn-sm btn-success">+ Add Tenant</a>
+                </div>
+
+                {% if report.current_tenants %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Move-in</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tenant in report.current_tenants %}
+                        <tr>
+                            <td>{{ tenant.name }}</td>
+                            <td>{{ tenant.email or '-' }}</td>
+                            <td>{{ tenant.phone or '-' }}</td>
+                            <td>{{ tenant.move_in_date.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('tenants.detail', tenant_id=tenant.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No current tenants.</p>
+                {% endif %}
+            </div>
+
+            <!-- Payments Tab -->
+            <div class="tab-pane fade" id="payments" role="tabpanel">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>Payment History</h5>
+                    <a href="{{ url_for('payments.create') }}" class="btn btn-sm btn-info text-white">+ Record Payment</a>
+                </div>
+
+                {% if report.payments %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in report.payments %}
+                        <tr>
+                            <td>{{ payment.payment_date.strftime('%b %d, %Y') }}</td>
+                            <td>${{ "%.2f" | format(payment.amount) }}</td>
+                            <td>{{ payment.notes or '-' }}</td>
+                            <td>
+                                <a href="{{ url_for('payments.detail', payment_id=payment.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No payments recorded.</p>
+                {% endif %}
+            </div>
+
+            <!-- Charges Tab -->
+            <div class="tab-pane fade" id="charges" role="tabpanel">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>Rent Charges</h5>
+                    <a href="{{ url_for('rent_charges.create', property_id=property.id) }}" class="btn btn-sm btn-primary">+ Add Rent Charge</a>
+                </div>
+
+                {% if report.charges %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Amount Due</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for charge in report.charges %}
+                        <tr>
+                            <td>
+                                {{ charge.period_start.strftime('%b %d') }} - {{ charge.period_end.strftime('%b %d, %Y') }}
+                            </td>
+                            <td>${{ "%.2f" | format(charge.amount_due) }}</td>
+                            <td>{{ charge.due_date.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                {% if charge.status == ChargeStatus.PAID %}
+                                <span class="badge bg-success">Paid</span>
+                                {% elif charge.status == ChargeStatus.LATE %}
+                                <span class="badge bg-warning">Late</span>
+                                {% elif charge.status == ChargeStatus.IN_ARREARS %}
+                                <span class="badge bg-danger">In Arrears</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Charged</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No rent charges recorded.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

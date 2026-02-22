@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Arrears Report - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Arrears Report</h1>
+</div>
+
+{% if not email_configured %}
+<div class="alert alert-warning">
+    <strong>Email not configured.</strong> Set SMTP environment variables to enable email notifications.
+</div>
+{% endif %}
+
+{% if arrears %}
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tenant</th>
+                    <th>Property</th>
+                    <th>Overdue Charges</th>
+                    <th>Total Outstanding</th>
+                    <th>Days Overdue</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in arrears %}
+                <tr class="{% if item.days_overdue > 30 %}table-danger{% elif item.days_overdue > 14 %}table-warning{% endif %}">
+                    <td>
+                        <strong>{{ item.tenant.name }}</strong>
+                        {% if item.tenant.email %}
+                        <br><small class="text-muted">{{ item.tenant.email }}</small>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.property.address }}, {{ item.property.city }}</td>
+                    <td>{{ item.charges | length }}</td>
+                    <td>
+                        <span class="fw-bold text-danger">${{ "%.2f" | format(item.total_outstanding) }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if item.days_overdue > 30 %}danger{% elif item.days_overdue > 14 %}warning{% else %}secondary{% endif %}">
+                            {{ item.days_overdue }} days
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('tenants.detail', tenant_id=item.tenant.id) }}" class="btn btn-sm btn-outline-primary">View Tenant</a>
+                            {% if item.has_email and email_configured %}
+                            <form method="POST" action="{{ url_for('reports.send_arrears_notice', tenant_id=item.tenant.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Send arrears notice to {{ item.tenant.email }}?');">Send Email</button>
+                            </form>
+                            {% elif not item.has_email %}
+                            <span class="badge bg-secondary">No Email</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <h3 class="text-success">No Arrears</h3>
+        <p class="text-muted">All tenants are up to date on their rent payments.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

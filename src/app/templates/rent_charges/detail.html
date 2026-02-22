@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Rent Charge Details - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Rent Charge Details</h1>
+    <form method="POST" action="{{ url_for('rent_charges.delete', charge_id=charge.id) }}" class="d-inline" onsubmit="return confirm('Are you sure? This will delete the charge and its payment allocations.');">
+        <button type="submit" class="btn btn-outline-danger">Delete Charge</button>
+    </form>
+</div>
+
+<div class="row">
+    <!-- Charge Info -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Charge Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Property:</strong><br>
+                    <a href="{{ url_for('properties.detail', property_id=charge.property_id) }}">
+                        {{ charge.property.address }}, {{ charge.property.city }}
+                    </a>
+                </div>
+                <div class="mb-3">
+                    <strong>Rental Period:</strong><br>
+                    {{ charge.period_start.strftime('%B %d, %Y') }} - {{ charge.period_end.strftime('%B %d, %Y') }}
+                </div>
+                <div class="mb-3">
+                    <strong>Due Date:</strong><br>
+                    {{ charge.due_date.strftime('%B %d, %Y') }}
+                </div>
+                <div class="mb-3">
+                    <strong>Amount Due:</strong><br>
+                    <span class="fs-4">${{ "%.2f" | format(charge.amount_due) }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong><br>
+                    {% if charge.status == ChargeStatus.PAID %}
+                    <span class="badge bg-success fs-6">Paid</span>
+                    {% elif charge.status == ChargeStatus.LATE %}
+                    <span class="badge bg-warning fs-6">Late</span>
+                    {% elif charge.status == ChargeStatus.IN_ARREARS %}
+                    <span class="badge bg-danger fs-6">In Arrears</span>
+                    {% else %}
+                    <span class="badge bg-secondary fs-6">Charged</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Summary -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Payment Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Total Allocated:</strong><br>
+                    <span class="text-success">${{ "%.2f" | format(total_allocated) }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Remaining:</strong><br>
+                    {% if remaining > 0 %}
+                    <span class="text-danger fs-4">${{ "%.2f" | format(remaining) }}</span>
+                    {% else %}
+                    <span class="text-success">Fully Paid</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Allocation Count:</strong><br>
+                    {{ charge.payment_allocations | length }} payment(s)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Allocations -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Payment Allocations</h5>
+            </div>
+            <div class="card-body">
+                {% if charge.payment_allocations %}
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>Amount</th>
+                            <th>Allocated On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for allocation in charge.payment_allocations %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('payments.detail', payment_id=allocation.payment_id) }}">
+                                    {{ allocation.payment.payment_date.strftime('%b %d, %Y') }}
+                                </a>
+                            </td>
+                            <td>${{ "%.2f" | format(allocation.amount) }}</td>
+                            <td>{{ allocation.created_at.strftime('%b %d, %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-active">
+                            <td><strong>Total</strong></td>
+                            <td><strong>${{ "%.2f" | format(total_allocated) }}</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                {% else %}
+                <p class="text-muted">No payments allocated to this charge yet.</p>
+                <a href="{{ url_for('payments.create') }}" class="btn btn-primary">Record Payment</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

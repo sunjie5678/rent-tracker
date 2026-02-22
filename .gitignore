@@ -39,3 +39,6 @@ htmlcov/
 .vscode/
 *.swp
 *.swo
+
+# Claude Code
+.claude/

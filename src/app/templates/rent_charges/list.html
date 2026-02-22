@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Rent Charges - RentTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Rent Charges</h1>
+    <a href="{{ url_for('rent_charges.create') }}" class="btn btn-primary">+ Add Rent Charge</a>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="GET" action="{{ url_for('rent_charges.list_charges') }}" class="row g-2 align-items-center">
+            <div class="col-auto">
+                {{ filter_form.property_id.label(class="form-label mb-0") }}
+            </div>
+            <div class="col-auto">
+                {{ filter_form.property_id(class="form-select form-select-sm") }}
+            </div>
+            <div class="col-auto">
+                {{ filter_form.status.label(class="form-label mb-0") }}
+            </div>
+            <div class="col-auto">
+                {{ filter_form.status(class="form-select form-select-sm") }}
+            </div>
+            <div class="col-auto">
+                {{ filter_form.submit(class="btn btn-sm btn-outline-primary") }}
+            </div>
+            {% if request.args.get('property_id') or request.args.get('status') %}
+            <div class="col-auto">
+                <a href="{{ url_for('rent_charges.list_charges') }}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if charges %}
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Period</th>
+                    <th>Amount Due</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Allocated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for charge in charges %}
+                {% set total_allocated = charge.payment_allocations | sum(attribute='amount') %}
+                {% set remaining = charge.amount_due - total_allocated %}
+                <tr class="{% if charge.status == ChargeStatus.IN_ARREARS %}table-danger{% elif charge.status == ChargeStatus.LATE %}table-warning{% endif %}">
+                    <td>
+                        {% set prop = properties.get(charge.property_id) %}
+                        {% if prop %}
+                        {{ prop.address }}, {{ prop.city }}
+                        {% else %}
+                        Unknown
+                        {% endif %}
+                    </td>
+                    <td>{{ charge.period_start.strftime('%b %d') }} - {{ charge.period_end.strftime('%b %d, %Y') }}</td>
+                    <td>${{ "%.2f" | format(charge.amount_due) }}</td>
+                    <td>{{ charge.due_date.strftime('%b %d, %Y') }}</td>
+                    <td>
+                        {% if charge.status == ChargeStatus.PAID %}
+                        <span class="badge bg-success">Paid</span>
+                        {% elif charge.status == ChargeStatus.LATE %}
+                        <span class="badge bg-warning">Late</span>
+                        {% elif charge.status == ChargeStatus.IN_ARREARS %}
+                        <span class="badge bg-danger">In Arrears</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Charged</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        ${{ "%.2f" | format(total_allocated) }}
+                        {% if remaining > 0 %}
+                        <span class="text-muted">(${{ "%.2f" | format(remaining) }} remaining)</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('rent_charges.detail', charge_id=charge.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">No rent charges found.</p>
+            <a href="{{ url_for('rent_charges.create') }}" class="btn btn-primary">Add Your First Rent Charge</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

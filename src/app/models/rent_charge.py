@@ -34,7 +34,13 @@ class RentCharge(Base):
     amount_due: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     due_date: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[ChargeStatus] = mapped_column(
-        SQLEnum(ChargeStatus), default=ChargeStatus.CHARGED, nullable=False
+        SQLEnum(
+            ChargeStatus,
+            native_enum=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        default=ChargeStatus.CHARGED,
+        nullable=False,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False

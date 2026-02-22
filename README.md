@@ -1,3 +1,40 @@
+
+## Local Development
+
+### Prerequisites
+
+- Python 3.10+
+- uv (optional, but recommended)
+
+### Setup
+
+1. **Install dependencies:**
+   ```bash
+   uv sync
+   ```
+
+2. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` with your database credentials.
+
+3. **Run the app:**
+   ```bash
+   .venv\Scripts\project.exe
+   ```
+
+   Or activate the environment first:
+   ```bash
+   .venv\Scripts\activate
+   project
+   ```
+
+4. **Open in browser:**
+   ```
+   http://localhost:5000
+   ```
+
 # **Project Proposal – Rental Payment Management System**
 
 ## **Proposed Software Name**
@@ -32,5 +69,5 @@ The target audience for RentTrack is small-scale residential landlords who manag
   * Used to implement application logic, design patterns, and overall system behavior  
 * **Cloud Database:** MySQL ( clever cloud [https://www.clever.cloud/product/mysql/](https://www.clever.cloud/product/mysql/) )  
   * Used to store persistent data such as properties, payment records.   
-* **Version Control:** Git  
+* **Version Control:** Git
   * Used to track incremental development progress and changes throughout the project

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - RentTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Record New Payment</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('payments.create') }}">
+                    {{ form.csrf_token }}
+
+                    <div class="mb-3">
+                        {{ form.property_id.label(class="form-label") }}
+                        {{ form.property_id(class="form-select", required=true) }}
+                        {% if form.property_id.errors %}
+                        <div class="invalid-feedback d-block">{{ form.property_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.amount.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.amount(class="form-control", required=true, step="0.01", min="0.01") }}
+                            </div>
+                            {% if form.amount.errors %}
+                            <div class="invalid-feedback d-block">{{ form.amount.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.payment_date.label(class="form-label") }}
+                            {{ form.payment_date(class="form-control", type="date", required=true) }}
+                            {% if form.payment_date.errors %}
+                            <div class="invalid-feedback d-block">{{ form.payment_date.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows=3) }}
+                        {% if form.notes.errors %}
+                        <div class="invalid-feedback d-block">{{ form.notes.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('payments.list_payments') }}" class="btn btn-outline-secondary">Cancel</a>
+                        {{ form.submit(class="btn btn-info text-white") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
