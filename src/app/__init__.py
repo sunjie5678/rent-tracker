@@ -31,6 +31,7 @@ def create_app(config_name=None):
     from app.routes.allocations import bp as allocations_bp
     from app.routes.rent_charges import bp as rent_charges_bp
     from app.routes.reports import bp as reports_bp
+    from app.routes.email import bp as email_bp
 
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(properties_bp, url_prefix="/properties")
@@ -39,6 +40,7 @@ def create_app(config_name=None):
     app.register_blueprint(allocations_bp, url_prefix="/allocations")
     app.register_blueprint(rent_charges_bp, url_prefix="/rent-charges")
     app.register_blueprint(reports_bp, url_prefix="/reports")
+    app.register_blueprint(email_bp, url_prefix="/email")
 
     # Template globals
     from app.models.rent_charge import ChargeStatus

@@ -1,0 +1,15 @@
+{
+    "_public_key": "7ab78512e5b8785631a7d4298adfc2d4b8d81535a43d94b35d89025bda6b5407",
+    "installed": {
+        "_client_id": "555803618353-hgfrvau2sobq2a6qb911u9n4otiqp0ju.apps.googleusercontent.com",
+        "_project_id": "renttrack-489603",
+        "_auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "_token_uri": "https://oauth2.googleapis.com/token",
+        "_auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "EJ[1:8Jq/yHuuYfAEg67pQMFjEU7ii0ZWMUhr5cpejUiu9wk=:pxbzGAk7TWVW+23bwEhm7+cikfn0hkmt:wQvhK0TfPy3IkgHEm467nJcLsdjK4J0iXCqn7ZGN3+IrWbYdvq+m7q22XX9MMQR3Jd3P]",
+        "_redirect_uris": [
+            "http://localhost"
+        ]
+    },
+    "google_oauth_token": "EJ[1:d6HmZ/ZRlStSkfOaQNIlzbWvO61VwfGevw5cFGhjeB4=:vszn9RZdvgO36v/PKmHfw4O9thmmN8aE:30AiJbwXmcPoOo+tT/fZUFNO1PGbbxW2qOB8GnCiFkDI/26v7WYuvSG6xSLKEqMygMX3Kff1xAx2/o6sBOWpSGZHTwRikvexiXe8vjGfwG1YPhGb2iGDAMj3RnWHcZVnubARJ3RDs9zGktlVYnS1LQ8T0gvTLNQ=]"
+}
