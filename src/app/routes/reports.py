@@ -2,8 +2,10 @@
 
 from flask import Blueprint, flash, redirect, render_template, url_for
 
+from app.config import is_email_configured
 from app.forms.report_forms import DateRangeForm, PropertyReportForm
-from app.repositories.property_repository import PropertyRepository
+from app.repositories.tenant_repository import TenantRepository
+from app.services.email_service import EmailService
 from app.services.report_service import ReportService
 
 bp = Blueprint("reports", __name__)
@@ -26,7 +28,46 @@ def arrears():
     return render_template(
         "reports/arrears.html",
         arrears=arrears_data,
+        email_configured=is_email_configured(),
     )
+
+
+@bp.route("/arrears/send-notice/<int:tenant_id>", methods=["POST"])
+def send_arrears_notice(tenant_id: int):
+    """Send arrears notice email to a tenant from the arrears report."""
+    if not is_email_configured():
+        flash("Email is not configured. Set Google Gmail API variables in .env.", "warning")
+        return redirect(url_for("reports.arrears"))
+
+    tenant_repo = TenantRepository()
+    tenant = tenant_repo.get_by_id(tenant_id)
+    if not tenant or not tenant.email:
+        flash("Tenant not found or has no email address.", "danger")
+        return redirect(url_for("reports.arrears"))
+
+    service = ReportService()
+    arrears_data = service.get_arrears_report()
+    row = next((x for x in arrears_data if x["tenant"].id == tenant_id), None)
+    if not row:
+        flash("No arrears on record for this tenant.", "warning")
+        return redirect(url_for("reports.arrears"))
+
+    prop = row["property"]
+    address = f"{prop.address}, {prop.city}"
+
+    try:
+        EmailService().send_arrears_notice(
+            tenant_email=tenant.email,
+            tenant_name=tenant.name,
+            property_address=address,
+            amount_owed=float(row["total_outstanding"]),
+            days_overdue=row["days_overdue"],
+        )
+        flash(f"Arrears notice sent to {tenant.email}.", "success")
+    except Exception as e:
+        flash(f"Failed to send email: {e}", "danger")
+
+    return redirect(url_for("reports.arrears"))
 
 
 @bp.route("/property/<int:property_id>")

@@ -9,7 +9,9 @@
 
 {% if not email_configured %}
 <div class="alert alert-warning">
-    <strong>Email not configured.</strong> Set SMTP environment variables to enable email notifications.
+    <strong>Email not configured.</strong> Set <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>,
+    <code>GOOGLE_REFRESH_TOKEN</code>, and <code>GOOGLE_EMAIL_FROM</code> in your environment (see <code>.env.example</code>)
+    to enable Gmail notifications.
 </div>
 {% endif %}
 

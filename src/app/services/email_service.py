@@ -1,14 +1,19 @@
 """Email service using Google Gmail API."""
 
 import os
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from base64 import urlsafe_b64encode
+from datetime import date
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+def _format_date(d: date) -> str:
+    return d.strftime("%B %d, %Y")
 
 
 class EmailService:
@@ -111,6 +116,39 @@ class EmailService:
             <p>is due on <b>{due_date}</b></p>
             <p>Amount due: <b>${amount_due:.2f}</b></p>
             <p>Please ensure your payment is submitted on time to avoid late fees.</p>
+            <p>Best regards,<br/>RentTrack</p>
+        </body>
+        </html>
+        """
+
+        return self.send_email(tenant_email, subject, html_body)
+
+    def send_new_rent_charge_notice(
+        self,
+        tenant_email: str,
+        tenant_name: str,
+        property_address: str,
+        amount_due: float,
+        due_date: date,
+        period_start: date,
+        period_end: date,
+    ) -> dict:
+        """Email when a new rent charge is posted; highlights the due date."""
+        due_str = _format_date(due_date)
+        subject = f"New rent charge — due {due_str}"
+        html_body = f"""
+        <html>
+        <body>
+            <h2>New rent charge</h2>
+            <p>Dear {tenant_name},</p>
+            <p>A new rent charge has been added for:</p>
+            <p><b>{property_address}</b></p>
+            <p style="font-size: 1.15em; margin: 1em 0;">
+                <strong>Due date:</strong> {due_str}
+            </p>
+            <p>Amount due: <b>${amount_due:.2f}</b></p>
+            <p>Rental period: {_format_date(period_start)} to {_format_date(period_end)}</p>
+            <p>Please ensure payment is received by the due date.</p>
             <p>Best regards,<br/>RentTrack</p>
         </body>
         </html>

@@ -6,6 +6,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+_GOOGLE_EMAIL_KEYS = (
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REFRESH_TOKEN",
+    "GOOGLE_EMAIL_FROM",
+)
+
+
+def is_email_configured() -> bool:
+    """True if Gmail API env vars are set (used for reminders and notices)."""
+    return all(os.environ.get(k) for k in _GOOGLE_EMAIL_KEYS)
+
 
 class Config:
     """Base configuration class."""
