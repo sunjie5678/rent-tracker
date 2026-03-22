@@ -13,7 +13,7 @@
    uv sync
    ```
 
-2. **Configure environment variables:**
+2. **Configure environment variables (Optional, only if you want to use your own creds):**
    ```bash
    cp .env.example .env
    ```
@@ -22,6 +22,11 @@
 3. **Run the app:**
    ```bash
    .venv\Scripts\project.exe
+   ```
+
+  Or with uv
+   ```bash
+   uv run project 
    ```
 
    Or activate the environment first:
