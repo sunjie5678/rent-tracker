@@ -4,6 +4,13 @@ from datetime import date
 
 from sqlalchemy import func
 
+from app.domain.charge_states import (
+    statuses_in_total_arrears_money,
+    statuses_outstanding_charges,
+    statuses_overdue_due_passed,
+    statuses_upcoming_dues,
+    statuses_in_arrears_report,
+)
 from app.models.rent_charge import ChargeStatus, RentCharge
 from app.repositories.base_repository import BaseRepository
 
@@ -33,6 +40,15 @@ class RentChargeRepository(BaseRepository[RentCharge]):
             .all()
         )
 
+    def get_charges_for_arrears_report(self) -> list[RentCharge]:
+        """Charges included in tenant arrears report (asks domain which statuses qualify)."""
+        return (
+            self._session.query(RentCharge)
+            .filter(RentCharge.status.in_(statuses_in_arrears_report()))
+            .order_by(RentCharge.due_date)
+            .all()
+        )
+
     def get_overdue(self, as_of_date: date | None = None) -> list[RentCharge]:
         """Get overdue charges (due date passed, not fully paid).
 
@@ -46,7 +62,7 @@ class RentChargeRepository(BaseRepository[RentCharge]):
             self._session.query(RentCharge)
             .filter(
                 RentCharge.due_date < as_of_date,
-                RentCharge.status.in_([ChargeStatus.CHARGED, ChargeStatus.LATE]),
+                RentCharge.status.in_(statuses_overdue_due_passed()),
             )
             .order_by(RentCharge.due_date)
             .all()
@@ -62,7 +78,7 @@ class RentChargeRepository(BaseRepository[RentCharge]):
             .filter(
                 RentCharge.due_date >= today,
                 RentCharge.due_date <= future,
-                RentCharge.status == ChargeStatus.CHARGED,
+                RentCharge.status.in_(statuses_upcoming_dues()),
             )
             .order_by(RentCharge.due_date)
             .all()
@@ -74,7 +90,7 @@ class RentChargeRepository(BaseRepository[RentCharge]):
             self._session.query(RentCharge)
             .filter(
                 RentCharge.property_id == property_id,
-                RentCharge.status.in_([ChargeStatus.CHARGED, ChargeStatus.LATE, ChargeStatus.IN_ARREARS]),
+                RentCharge.status.in_(statuses_outstanding_charges()),
             )
             .order_by(RentCharge.due_date.asc())
             .all()
@@ -101,7 +117,7 @@ class RentChargeRepository(BaseRepository[RentCharge]):
             )
             .outerjoin(allocated, RentCharge.id == allocated.c.charge_id)
             .filter(
-                RentCharge.status.in_([ChargeStatus.LATE, ChargeStatus.IN_ARREARS]),
+                RentCharge.status.in_(statuses_in_total_arrears_money()),
             )
             .scalar()
         )

@@ -38,15 +38,7 @@
                 </div>
                 <div class="mb-3">
                     <strong>Status:</strong><br>
-                    {% if charge.status == ChargeStatus.PAID %}
-                    <span class="badge bg-success fs-6">Paid</span>
-                    {% elif charge.status == ChargeStatus.LATE %}
-                    <span class="badge bg-warning fs-6">Late</span>
-                    {% elif charge.status == ChargeStatus.IN_ARREARS %}
-                    <span class="badge bg-danger fs-6">In Arrears</span>
-                    {% else %}
-                    <span class="badge bg-secondary fs-6">Charged</span>
-                    {% endif %}
+                    <span class="badge {{ charge_badge_class(charge) }} fs-6">{{ charge_badge_label(charge) }}</span>
                 </div>
             </div>
         </div>

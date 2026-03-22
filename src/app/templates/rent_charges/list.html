@@ -55,7 +55,7 @@
                 {% for charge in charges %}
                 {% set total_allocated = charge.payment_allocations | sum(attribute='amount') %}
                 {% set remaining = charge.amount_due - total_allocated %}
-                <tr class="{% if charge.status == ChargeStatus.IN_ARREARS %}table-danger{% elif charge.status == ChargeStatus.LATE %}table-warning{% endif %}">
+                <tr class="{{ charge_table_row_class(charge) }}">
                     <td>
                         {% set prop = properties.get(charge.property_id) %}
                         {% if prop %}
@@ -68,15 +68,7 @@
                     <td>${{ "%.2f" | format(charge.amount_due) }}</td>
                     <td>{{ charge.due_date.strftime('%b %d, %Y') }}</td>
                     <td>
-                        {% if charge.status == ChargeStatus.PAID %}
-                        <span class="badge bg-success">Paid</span>
-                        {% elif charge.status == ChargeStatus.LATE %}
-                        <span class="badge bg-warning">Late</span>
-                        {% elif charge.status == ChargeStatus.IN_ARREARS %}
-                        <span class="badge bg-danger">In Arrears</span>
-                        {% else %}
-                        <span class="badge bg-secondary">Charged</span>
-                        {% endif %}
+                        <span class="badge {{ charge_badge_class(charge) }}">{{ charge_badge_label(charge) }}</span>
                     </td>
                     <td>
                         ${{ "%.2f" | format(total_allocated) }}

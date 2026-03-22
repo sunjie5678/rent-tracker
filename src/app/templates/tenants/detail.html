@@ -99,15 +99,7 @@
                             <td>{{ charge.period_start.strftime('%b %Y') }}</td>
                             <td>${{ "%.2f" | format(charge.amount_due) }}</td>
                             <td>
-                                {% if charge.status == ChargeStatus.PAID %}
-                                <span class="badge bg-success">Paid</span>
-                                {% elif charge.status == ChargeStatus.LATE %}
-                                <span class="badge bg-warning">Late</span>
-                                {% elif charge.status == ChargeStatus.IN_ARREARS %}
-                                <span class="badge bg-danger">In Arrears</span>
-                                {% else %}
-                                <span class="badge bg-secondary">Charged</span>
-                                {% endif %}
+                                <span class="badge {{ charge_badge_class(charge) }}">{{ charge_badge_label(charge) }}</span>
                             </td>
                         </tr>
                         {% endfor %}

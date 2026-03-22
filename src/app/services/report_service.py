@@ -120,13 +120,8 @@ class ReportService:
         """
         from collections import defaultdict
 
-        # Get late and in-arrears charges
-        late_charges = self._charge_repo.get_by_status(ChargeStatus.LATE)
-        arrears_charges = self._charge_repo.get_by_status(
-            ChargeStatus.IN_ARREARS
-        )
-
-        all_overdue = late_charges + arrears_charges
+        # Charges whose state behavior says they belong in arrears reporting
+        all_overdue = self._charge_repo.get_charges_for_arrears_report()
 
         # Group by tenant
         by_tenant = defaultdict(list)

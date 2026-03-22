@@ -43,8 +43,22 @@ def create_app(config_name=None):
     app.register_blueprint(email_bp, url_prefix="/email")
 
     # Template globals
+    from app.domain.charge_states import get_behavior
     from app.models.rent_charge import ChargeStatus
 
     app.jinja_env.globals["ChargeStatus"] = ChargeStatus
+
+    def _charge_table_row_class(charge):
+        return get_behavior(charge.status).table_row_class()
+
+    def _charge_badge_class(charge):
+        return get_behavior(charge.status).badge_bootstrap_class()
+
+    def _charge_badge_label(charge):
+        return get_behavior(charge.status).badge_label()
+
+    app.jinja_env.globals["charge_table_row_class"] = _charge_table_row_class
+    app.jinja_env.globals["charge_badge_class"] = _charge_badge_class
+    app.jinja_env.globals["charge_badge_label"] = _charge_badge_label
 
     return app

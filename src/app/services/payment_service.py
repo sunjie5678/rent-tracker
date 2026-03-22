@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from app.database import db_session
+from app.domain.charge_states import ChargeStatusResolver
 from app.models.payment_allocation import PaymentAllocation
 from app.models.rent_charge import ChargeStatus, RentCharge
 from app.repositories.payment_repository import PaymentRepository
@@ -62,25 +63,15 @@ class PaymentService:
         return allocation
 
     def _update_charge_status(self, charge: RentCharge) -> None:
-        """Update charge status based on payment state.
-
-        Implements State pattern transitions:
-        CHARGED → PAID/LATE/IN_ARREARS
-        """
         total_allocated = Decimal(
             str(sum(a.amount for a in charge.payment_allocations))
         )
-        today = date.today()
-
-        if total_allocated >= charge.amount_due:
-            charge.status = ChargeStatus.PAID
-        elif total_allocated > 0 and today > charge.due_date:
-            charge.status = ChargeStatus.LATE
-        elif total_allocated == 0 and today > charge.due_date:
-            charge.status = ChargeStatus.IN_ARREARS
-        else:
-            charge.status = ChargeStatus.CHARGED
-
+        amount_due = Decimal(str(charge.amount_due))
+        charge.status = ChargeStatusResolver.resolve_from_ledger(
+            total_allocated,
+            amount_due,
+            charge.due_date,
+        )
         db_session.commit()
 
     def update_charge_status(self, charge: RentCharge) -> ChargeStatus:

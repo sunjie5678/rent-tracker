@@ -12,8 +12,6 @@ from app.models.base import Base
 
 
 class ChargeStatus(str, Enum):
-    """Rental payment state - supports State pattern for status transitions."""
-
     CHARGED = "charged"      # Rent charged, not yet due
     PAID = "paid"            # Fully paid
     LATE = "late"            # Past due, partially paid
